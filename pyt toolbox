@@ -1,0 +1,109 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+# Set Seaborn style
+sns.set(style="whitegrid")
+plt.rcParams["figure.figsize"] = (10, 6)
+
+# Load the CSV file (update the path if needed)
+file_path = "C:\\Users\\manju\\Documents\\Crime_Data_from_2020_to_Present (version 1).xlsb.csv"
+df = pd.read_csv(file_path)
+
+# Convert date column to datetime
+df['DATE OCC'] = pd.to_datetime(df['DATE OCC'], errors='coerce')
+
+# 1. Bar Graph: Top 10 Crime Types
+crime_counts = df['Crm Cd Desc'].value_counts().nlargest(10)
+plt.figure()
+crime_counts.plot(kind='bar', color='skyblue')
+plt.title("Top 10 Crime Types")
+plt.ylabel("Count")
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+plt.show()
+
+# 2. Line Graph: Monthly crime trends
+monthly_crimes = df.groupby(df['DATE OCC'].dt.to_period('M')).size()
+plt.figure()
+monthly_crimes.plot(kind='line', marker='o')
+plt.title("Monthly Crime Trend")
+plt.xlabel("Month")
+plt.ylabel("Number of Crimes")
+plt.tight_layout()
+plt.show()
+
+# 3. Pie Chart: Victim Sex
+vict_sex_counts = df['Vict Sex'].value_counts()
+plt.figure()
+vict_sex_counts.plot(kind='pie', autopct='%1.1f%%', startangle=140, colors=sns.color_palette('pastel'))
+plt.ylabel('')
+plt.title("Victim Sex Distribution")
+plt.tight_layout()
+plt.show()
+
+# 4. Scatter Plot: Victim Age vs Longitude with Victim Sex hue
+# 4. Scatter Plot: Victim Age vs Crime Code (New Objective)
+plt.figure()
+sns.scatterplot(data=df, x='Vict Age', y='Crm Cd', alpha=0.4, s=20, color='coral')
+plt.title("Scatter Plot: Victim Age vs Crime Code")
+plt.xlabel("Victim Age")
+plt.ylabel("Crime Code")
+plt.tight_layout()
+plt.show()
+
+
+# 5. Histogram: Victim Age
+plt.figure()
+df['Vict Age'].dropna().plot(kind='hist', bins=20, color='purple', edgecolor='black')
+plt.title("Distribution of Victim Age")
+plt.xlabel("Age")
+plt.tight_layout()
+plt.show()
+
+# 6. Bar Graph: Crimes by Area Name
+area_crimes = df['AREA NAME'].value_counts()
+plt.figure()
+area_crimes.plot(kind='bar', color='teal')
+plt.title("Crimes by Area")
+plt.ylabel("Number of Crimes")
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+plt.show()
+
+# 7. Stacked Bar: Top 5 Crimes by Victim Sex
+top5_crimes = df['Crm Cd Desc'].value_counts().nlargest(5).index
+filtered = df[df['Crm Cd Desc'].isin(top5_crimes)]
+cross_tab = pd.crosstab(filtered['Crm Cd Desc'], filtered['Vict Sex'])
+cross_tab.plot(kind='bar', stacked=True, colormap='tab20')
+plt.title("Top 5 Crimes by Victim Sex")
+plt.ylabel("Count")
+plt.tight_layout()
+plt.show()
+
+# 8. Heatmap: Correlation of Numeric Features
+plt.figure()
+sns.heatmap(df.select_dtypes(include=np.number).corr(), annot=True, cmap='coolwarm', fmt=".2f")
+plt.title("Correlation Heatmap")
+plt.tight_layout()
+plt.show()
+
+# 9. Boxplot: Victim Age for Top 5 Crimes
+plt.figure()
+sns.boxplot(data=df[df['Crm Cd Desc'].isin(top5_crimes)], x='Crm Cd Desc', y='Vict Age')
+plt.title("Victim Age Distribution by Crime Type")
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+plt.show()
+
+# 10. Donut Chart: Top 5 Weapons Used
+weapon_counts = df['Weapon Desc'].value_counts().nlargest(5)
+plt.figure()
+plt.pie(weapon_counts, labels=weapon_counts.index, autopct='%1.1f%%', startangle=140,
+        colors=sns.color_palette('Set3'), wedgeprops=dict(width=0.4))
+plt.title("Top 5 Weapons Used")
+plt.tight_layout()
+plt.show()
+
+print("All graphs shown successfully.")
